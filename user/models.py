@@ -15,8 +15,11 @@ class User(db.Model):
     password = db.Column(db.String(255))
     is_admin = db.Column(db.Boolean)
     api_key = db.Column(db.String(255), unique=True, nullable=True)
+
+    # Flask LoginManager interface properties
     is_active = db.Column(db.Boolean, default=True)
-    authenticated = db.Column(db.Boolean, default=False)
+    is_authenticated = db.Column(db.Boolean, default=False)
+    is_anonymous = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return f'<user {self.id} {self.username}>'
@@ -32,6 +35,7 @@ class User(db.Model):
 
     def update_api_key(self):
         self.api_key = generate_password_hash(self.username+str(datetime.utcnow))
+        self.is_authenticated = True
 
     def get_id(self):
         return self.id
