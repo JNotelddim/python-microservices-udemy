@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, make_response
 from models import db, User
+from flask_login import login_user
 from werkzeug.security import generate_password_hash, check_password_hash
 
 user_blueprint = Blueprint('user_api_routes', __name__, url_prefix='/api/user')
@@ -32,3 +33,22 @@ def create_user():
         print(e)
         response = { 'message': "Error creating user."}
     return jsonify(response)
+
+@user_blueprint.route('login', methods=['POST'])
+def login():
+    username = request.form["username"]
+    password = request.form["password"]
+
+    existing_user = User.query.filter_by(username=username).first()
+
+    if not existing_user:
+        return make_response(jsonify({'message': 'Username not found.'}), 401)
+
+    if check_password_hash(existing_user.password, password):
+        existing_user.update_api_key()
+        db.session.commit()
+        login_user(existing_user)
+        response = {'message': 'Logged in.', 'api_key': existing_user.api_key}
+        return make_response(jsonify(response), 200)
+
+    return make_response(jsonify({'message': 'Access denied.'}), 401)
