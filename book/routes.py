@@ -7,7 +7,12 @@ book_blueprint = Blueprint('book_api_routes', __name__, url_prefix='/api/book')
 
 @book_blueprint.route('/all', methods=['GET'])
 def get_all_books():
-    return "all bokoks"
+    all_books = Book.query.all()
+
+    result = [book.serialize() for book in all_books]
+
+    response = {"result": result}
+    return jsonify(response)
 
 @book_blueprint.route('/create', methods=['POST'])
 def create_books():
@@ -30,4 +35,12 @@ def create_books():
 
 @book_blueprint.route('/<slug>', methods=['GET'])
 def book_details(slug):
-    return "book details " + slug
+    print(slug)
+    book = Book.query.filter_by(slug=slug).first()
+
+    if book:
+        response  = { 'result': book.serialize() }
+    else:
+        response = { 'message': 'No books found'}
+
+    return jsonify(response)
