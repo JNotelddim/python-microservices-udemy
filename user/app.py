@@ -1,4 +1,3 @@
-import base64
 import os
 from flask import Flask
 from flask_migrate import Migrate
