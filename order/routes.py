@@ -73,7 +73,7 @@ def add_order_item():
         for item in open_order.order_items:
             if item.book_id == book_id:
                 item.quantity += quantity
-            found = True
+                found = True
 
         if not found:
             order_item = OrderItem(book_id=book_id, quantity=quantity)

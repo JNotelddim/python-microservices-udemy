@@ -24,10 +24,23 @@ migrate = Migrate(app, models.db)
 
 @login_manager.user_loader
 def load_user(user_id):
-    print(f'loading user with id: {user_id}...')
+    print(f'[user loader] Loading user with id: {user_id}...')
     user = models.User.query.filter_by(id=user_id).first()
-    print(f'found user: {user}')
+    print(f'[user loader] Found user: {user}')
     return user
+
+
+@login_manager.request_loader
+def load_user(request):
+    print(f'[request loader] Loading user by token value...')
+    token = request.headers.get('Authorization')
+    user_by_token = models.User.query.filter_by(api_key=token).first()
+    if not user_by_token:
+        print(f'[request loader] No user found for token value: {user_by_token}')
+        return None
+    else:
+        print(f'[request loader] Found user {user_by_token}')
+        return user_by_token
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
