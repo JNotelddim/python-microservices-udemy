@@ -5,7 +5,7 @@ from models import Order, OrderItem, db
 
 order_blueprint = Blueprint('order_api_route', __name__, url_prefix="/api/order")
 
-USER_API_URL = 'http://127.0.0.1:5001/user/api'
+USER_API_URL = 'http://127.0.0.1:5001/api/user'
 
 def get_user(api_key):
     headers = {
@@ -21,7 +21,22 @@ def get_user(api_key):
 
 @order_blueprint.route('/', methods=['GET'])
 def get_open_order():
-    return "Open order"
+    api_key = request.headers.get('Authorization')
+    if not api_key:
+        return make_response(jsonify({ 'message': 'Not logged in.'}), 401)
+
+    response = get_user(api_key=api_key)
+    user = response.get('result')
+    if not user:
+        return make_response(jsonify({ 'message': 'Not logged in.'}), 401)
+
+    open_order = Order.query.filter_by(user_id=user['id'], is_open=1).first()
+    if open_order:
+        return make_response(jsonify({
+            'result': open_order.serialize()
+        }),200)
+    else:
+        return jsonify({ 'message': 'No open orders.'})
 
 @order_blueprint.route('/all', methods=['GET'])
 def get_all_orders():
@@ -71,4 +86,21 @@ def add_order_item():
 
 @order_blueprint.route('/checkout', methods=['POST'])
 def checkout():
-    return "checkout"
+    api_key = request.headers.get('Authorization')
+    if not api_key:
+        return make_response(jsonify({ 'message': 'Not logged in.'}), 401)
+
+    response = get_user(api_key=api_key)
+    user = response.get('result')
+    if not user:
+        return make_response(jsonify({ 'message': 'Not logged in.'}), 401)
+
+    open_order = Order.query.filter_by(user_is=user['id'], is_open=1).first()
+
+    if open_order:
+        open_order.is_open = False
+        db.session.add(open_order)
+        db.session.commit()
+        return jsonify({'result': open_order.serialize()})
+    else:
+        return jsonify({'message': 'No open orders.'})
