@@ -25,6 +25,10 @@ class OrderItem(db.Model):
     book_id = db.Column(db.Integer)
     quantity = db.Column(db.Integer)
 
+    def __init__(self, book_id, quantity):
+        self.book_id = book_id
+        self.quantity = quantity
+
     def serialize(self):
         return {
            'product': self.book_id,
