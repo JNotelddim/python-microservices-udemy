@@ -26,17 +26,17 @@ def register():
 
     print('method ' + request.method)
     if request.method == 'POST':
-        print('validate ' + form.validate_on_submit())
+        print(f'validate {str(form.validate_on_submit())}')
         if form.validate_on_submit():
             username = form.username.data
 
-            print('User exists: '+ UserClient.user_exists(username))
+            print('User exists: '+ str(UserClient.user_exists(username)))
             if UserClient.user_exists(username):
                 flash("Uesrname taken.")
                 return render_template('register.html', form=form)
             else:
                 user = UserClient.create_user(form)
-                print('Created user: ' + user)
+                print('Created user: ' + str(user))
                 if user:
                     flash("Registered. Please login.")
                     return redirect(url_for('frontend.login'))
