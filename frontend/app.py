@@ -6,7 +6,7 @@ from routes import blueprint
 
 app = Flask(__name__, static_folder='static')
 
-app.config['SECRET'] = 'nBwg9uSus8m6kqApYqHUOQ'
+app.config['SECRET_KEY'] = 'nBwg9uSus8m6kqApYqHUOQ'
 app.config['WTF_CSRF_SECRET_KEY'] = 'nBwg9uSus8m6kqApYqHUOQ'
 app.config['UPLOAD_FOLDER'] = 'static/images'
 
