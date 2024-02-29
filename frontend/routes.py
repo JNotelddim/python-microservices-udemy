@@ -48,3 +48,31 @@ def register():
             return render_template('register.html', form=form)
 
     return render_template('register.html', form=form)
+
+@blueprint.route('/login', methods=['GET', 'POST'])
+def login():
+    form = forms.LoginForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            api_key = UserClient.login(form)
+            if api_key:
+                session['user_api_key'] = api_key
+                user = UserClient.get_user()
+                session['user'] = user
+
+                flash('Welcome back.')
+                return redirect(url_for('frontend.index'))
+            else:
+                flash("Cannot log in.")
+
+        else:
+            flash("Cannot log in.")
+
+    return render_template('login.html', form=form)
+
+@blueprint.route('/logout', methods=['GET'])
+def logout():
+    session.clear()
+    flash('Logged out.')
+    # what about UserClient.logout?
+    return redirect(url_for('frontend.index'))
