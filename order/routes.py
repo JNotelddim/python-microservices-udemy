@@ -5,7 +5,7 @@ from models import Order, OrderItem, db
 
 order_blueprint = Blueprint('order_api_route', __name__, url_prefix="/api/order")
 
-USER_API_URL = 'http://127.0.0.1:5001/api/user/'
+USER_API_URL = 'http://user-service-c:5001/api/user/'
 
 def get_user(api_key):
     print(f'[Order get_user()] api_key: {api_key}')
