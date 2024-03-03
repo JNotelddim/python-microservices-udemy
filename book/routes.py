@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 
 from models import Book, db
 
@@ -43,4 +43,6 @@ def book_details(slug):
     else:
         response = { 'message': 'No books found'}
 
+    print(response)
+    print(f'book details, session: {session}')
     return jsonify(response)
