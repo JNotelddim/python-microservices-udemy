@@ -19,6 +19,7 @@ class OrderClient:
         }
 
         headers = { 'Authorization': session['user_api_key']}
+        print(f'add to cart, headers: {headers}')
         response = requests.post(ORDER_API_URL+'/api/order/add-item',
                                  headers=headers,
                                  data=payload)

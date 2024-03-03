@@ -6,6 +6,7 @@ from . import USER_API_URL
 class UserClient:
     @staticmethod
     def login(form):
+        print('[UserClient] get user...')
         api_key = None
         payload = {
             'username': form.username.data,
@@ -18,16 +19,27 @@ class UserClient:
         if response:
             api_key = response.json().get('api_key')
 
+        print(f'[UserClient] repsonse: {response}, api_key: {api_key}')
+
         return api_key
+
+    @staticmethod
+    def logout():
+        url = USER_API_URL + '/api/user/logout'
+        response = requests.post(url)
+        print('[UserClient] logout result' + str(response))
+        return response
 
     @staticmethod
     def get_user():
         headers = {
             'Authorization': session['user_api_key']
         }
-        url = USER_API_URL + '/api/user'
+        print(f'[UserClient get_user()] headers: {headers}')
+        url = USER_API_URL + '/api/user/'
 
         response = requests.get(url, headers=headers)
+        print(f'[UserClient get_user()] response: {response}')
         return response.json()
 
     @staticmethod

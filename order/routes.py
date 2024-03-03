@@ -5,9 +5,10 @@ from models import Order, OrderItem, db
 
 order_blueprint = Blueprint('order_api_route', __name__, url_prefix="/api/order")
 
-USER_API_URL = 'http://127.0.0.1:5001/api/user'
+USER_API_URL = 'http://127.0.0.1:5001/api/user/'
 
 def get_user(api_key):
+    print(f'[Order get_user()] api_key: {api_key}')
     headers = {
         'Authorization': api_key,
     }
@@ -17,6 +18,7 @@ def get_user(api_key):
         return { 'message': 'Not Authorized'}
 
     user = response.json()
+    print(f'[Order get_user()] user: {user}')
     return user
 
 @order_blueprint.route('/', methods=['GET'])
@@ -47,11 +49,14 @@ def get_all_orders():
 @order_blueprint.route('/add-item', methods=['POST'])
 def add_order_item():
     api_key = request.headers.get('Authorization')
+    print(f'request headers: {request.headers}')
     if not api_key:
+        print('[Order] missing key')
         return make_response(jsonify({ 'message': 'Not logged in.'}), 401)
 
     response = get_user(api_key=api_key)
     if not response.get('result'):
+        print('[Order] user not logged in.')
         return make_response(jsonify({ 'message': 'Not logged in.'}), 401)
 
     user = response.get('result')

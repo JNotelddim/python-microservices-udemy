@@ -24,26 +24,26 @@ def index():
 def register():
     form = forms.RegistrationForm(request.form)
 
-    print('method ' + request.method)
+    print('[Frontend Register] method ' + request.method)
     if request.method == 'POST':
         print(f'validate {str(form.validate_on_submit())}')
         if form.validate_on_submit():
             username = form.username.data
 
-            print('User exists: '+ str(UserClient.user_exists(username)))
+            print('[Frontend Register] User exists: '+ str(UserClient.user_exists(username)))
             if UserClient.user_exists(username):
                 flash("Uesrname taken.")
                 return render_template('register.html', form=form)
             else:
                 user = UserClient.create_user(form)
-                print('Created user: ' + str(user))
+                print('[Frontend Register]Created user: ' + str(user))
                 if user:
                     flash("Registered. Please login.")
                     return redirect(url_for('frontend.login'))
                 else:
                     return render_template('register.html', form=form)
         else:
-            print('Other errors.')
+            print('[Frontend Register] Other errors.')
             flash('Errors')
             return render_template('register.html', form=form)
 
@@ -55,9 +55,12 @@ def login():
     if request.method == 'POST':
         if form.validate_on_submit():
             api_key = UserClient.login(form)
+            print(f'[Frontend login] api_key: {api_key}')
+
             if api_key:
                 session['user_api_key'] = api_key
                 user = UserClient.get_user()
+                print(f'[Frontend login] user: {user}, api_key: {api_key}')
                 session['user'] = user
 
                 flash('Welcome back.')
@@ -72,7 +75,32 @@ def login():
 
 @blueprint.route('/logout', methods=['GET'])
 def logout():
+    UserClient.logout()
     session.clear()
     flash('Logged out.')
     # what about UserClient.logout?
     return redirect(url_for('frontend.index'))
+
+@blueprint.route('/book/<slug>', methods=['GET', 'POST'])
+def book_details(slug):
+    response = BookClient.get_book(slug).json()
+    book = response['result']
+
+    form = forms.ItemForm(book_id=book['id'])
+
+    if request.method == 'POST':
+        print('[Frontend Bookdetails]' + str(session))
+        if 'user' not in session:
+            flash('Please log in')
+            return redirect(url_for('frontend.login'))
+
+        order = OrderClient.add_to_cart(book_id=book['id'], quantity=1)
+
+        # if order['message'] == 'Not logged in':
+            # return redirect(url_for('frontend.login'))
+
+        print(f'[Frontend bookdetails] order: {order}')
+        session['session'] = order['result']
+        flash('Book added to the cart')
+
+    return render_template('book_info.html', book=book, form=form)
