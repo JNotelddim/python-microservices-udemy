@@ -8,6 +8,16 @@ from api.user_api import UserClient
 
 blueprint = Blueprint('frontend', __name__)
 
+@blueprint.context_processor
+def cart_count():
+    count = 0
+    order = session.get('order')
+    if order:
+        for item in order.get('order_items'):
+            count += item['quantity']
+
+    return {'cart_items': count}
+
 @blueprint.route('/', methods=['GET'])
 def index():
     if current_user.is_authenticated:
@@ -63,6 +73,10 @@ def login():
                 print(f'[Frontend login] user: {user}, api_key: {api_key}')
                 session['user'] = user
 
+                order = OrderClient.get_order()
+                if order.get('result'):
+                    session['order'] = order['result']
+
                 flash('Welcome back.')
                 return redirect(url_for('frontend.index'))
             else:
@@ -95,6 +109,10 @@ def book_details(slug):
             return redirect(url_for('frontend.login'))
 
         order = OrderClient.add_to_cart(book_id=book['id'], quantity=1)
+
+        order = OrderClient.get_order()
+        if order.get('result'):
+            session['order'] = order['result']
 
         # if order['message'] == 'Not logged in':
             # return redirect(url_for('frontend.login'))
